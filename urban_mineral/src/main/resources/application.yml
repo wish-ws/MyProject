@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: urban_mineral
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+
+
+server:
+  port: 8080
+  servlet:
+    context-path: /urban_mineral
+
+
+
+lombok:
+  equalsAndHashCode:
+    callSuper: call
+
+
+mybatis:
+  mapper-locations: classpath:mapping/*.xml
+  type-aliases-package: com.um.domain.po
+
+
+mapper:
+  mappers: com.um.common.MyMapper
+  not-empty: false
+  identity: MYSQL
+
+
+#pagehelper
+pagehelper:
+  helperDialect: mysql
+  reasonable: true
+  supportMethodsArguments: true
+  params: count=countSql

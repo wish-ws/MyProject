@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.um.mapper.BusinessImgMapper">
+
+  <select id="queryBusinessImgList" resultType="com.um.domain.dto.BusinessImgDTO">
+    select
+      id,
+      img_path imgPath,
+      img_name imgName
+    from t_business_img
+    where business_code = #{businessCode}
+    and business_type =#{businessType}
+  </select>
+
+
+
+
+
+
+
+
+
+</mapper>

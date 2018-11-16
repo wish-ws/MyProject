@@ -1,0 +1,30 @@
+spring:
+  dataSource:
+    url: jdbc:mysql://192.168.0.188:3306/umt?characterEncoding=UTF-8&allowMultiQueries=true
+    username: suton
+    password: suton2018
+    driver-class-name: com.mysql.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+    filters: stat
+    maxActive: 20
+    initialSize: 1
+    maxWait: 60000
+    minIdle: 1
+    timeBetweenEvictionRunsMillis: 60000
+    minEvictableIdleTimeMillis: 300000
+    validationQuery: select 'x'
+    testWhileIdle: true
+    testOnBorrow: false
+    testOnReturn: false
+    poolPreparedStatements: true
+    maxOpenPreparedStatements: 20
+  jackson:
+      time-zone: GMT+8
+
+
+
+
+
+
+
+
