@@ -1,8 +1,11 @@
 package com.um.domain.po;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.um.domain.common.BaseDTO;
 import com.um.domain.common.BaseDTO;
+import com.um.util.DateUtil;
 import lombok.Data;
+import org.apache.commons.lang.StringUtils;
 
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -66,7 +69,7 @@ public class RecycleOrderPO extends BaseDTO {
     /**
      * 订单接收人
      */
-    private Integer orderReceiver;
+    private String orderReceiver;
 
     /**
      * 接收订单时间
@@ -74,6 +77,10 @@ public class RecycleOrderPO extends BaseDTO {
     private String receivedTime;
 
 
-
-
+    public void setReceivedTime(String receivedTime) {
+        if(StringUtils.isNotEmpty(receivedTime)){
+            receivedTime = DateUtil.dateFormat(receivedTime,DateUtil.hour_format);
+        }
+        this.receivedTime = receivedTime;
+    }
 }

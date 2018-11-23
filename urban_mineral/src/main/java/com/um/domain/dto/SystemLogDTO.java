@@ -1,7 +1,6 @@
 package com.um.domain.dto;
 
 import com.um.domain.common.BaseDTO;
-import com.um.domain.common.BaseDTO;
 import lombok.Data;
 
 import javax.persistence.GeneratedValue;
@@ -17,7 +16,9 @@ import javax.persistence.Table;
  */
 @Data
 public class SystemLogDTO extends BaseDTO {
-    private static final long serialVersionUID = -686755535523373971L;
+
+
+    private static final long serialVersionUID = 8832608423072088792L;
 
     /**
      * 主键id
@@ -29,11 +30,11 @@ public class SystemLogDTO extends BaseDTO {
      */
     private String logContent;
 
-    /**
-     * 操作人
-     */
-    private Integer userId;
 
+    /**
+     * 创建人登录名
+     */
+    private String creatorAccountName;
 
 
 }

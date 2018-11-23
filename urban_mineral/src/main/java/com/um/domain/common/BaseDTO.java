@@ -29,17 +29,18 @@ public class BaseDTO implements Serializable {
 
     private String modifiedTime;
 
-    public String getCreatedTime() {
+
+    public void setCreatedTime(String createdTime) {
         if(StringUtils.isNotEmpty(createdTime)){
             createdTime = DateUtil.dateFormat(createdTime,DateUtil.hour_format);
         }
-        return createdTime;
+        this.createdTime = createdTime;
     }
 
-    public String getModifiedTime() {
+    public void setModifiedTime(String modifiedTime) {
         if(StringUtils.isNotEmpty(modifiedTime)){
             modifiedTime = DateUtil.dateFormat(modifiedTime,DateUtil.hour_format);
         }
-        return modifiedTime;
+        this.modifiedTime = modifiedTime;
     }
 }

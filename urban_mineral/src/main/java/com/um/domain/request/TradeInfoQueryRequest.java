@@ -5,7 +5,7 @@ import lombok.Data;
 
 /**
  * @author : ws
- * @project : com.suton
+ * @project : com.um
  * @description :
  * @date : 2018/11/15 17:34
  */
@@ -29,5 +29,10 @@ public class TradeInfoQueryRequest extends BaseRequest {
      * 交易类型
      */
     private Integer tradeType;
+
+    /**
+     * 供求信息发布人
+     */
+    private Integer creatorUserId;
 
 }

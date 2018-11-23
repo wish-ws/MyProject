@@ -22,4 +22,15 @@ public enum RecycleOrderStatusEnum {
         this.key = key;
         this.desc = desc;
     }
+
+
+    public static String getDescByKey(int key){
+        String desc = null;
+        for (RecycleOrderStatusEnum recycleOrderStatusEnum : RecycleOrderStatusEnum.values()) {
+            if(recycleOrderStatusEnum.key == key){
+                desc = recycleOrderStatusEnum.desc;
+            }
+        }
+        return desc;
+    }
 }

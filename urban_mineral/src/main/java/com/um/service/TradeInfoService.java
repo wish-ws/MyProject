@@ -6,7 +6,7 @@ import com.um.domain.request.TradeInfoQueryRequest;
 
 /**
  * @author : ws
- * @project : com.suton
+ * @project : com.um
  * @description :
  * @date : 2018/11/15 16:48
  */
@@ -15,4 +15,6 @@ public interface TradeInfoService {
     PaginationSupportDTO queryTradeInfoPage(TradeInfoQueryRequest tradeInfoQueryRequest);
 
     void createTradeInfo(TradeInfoDTO tradeInfoDTO);
+
+    void deleteTradeInfo(Integer id);
 }

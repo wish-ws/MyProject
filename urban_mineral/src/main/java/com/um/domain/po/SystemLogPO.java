@@ -32,11 +32,10 @@ public class SystemLogPO extends BaseDTO {
      */
     private String logContent;
 
+
     /**
-     * 操作人
+     * 创建人登录名
      */
-    private Integer userId;
-
-
+    private String creatorAccountName;
 
 }

@@ -41,5 +41,4 @@ public class BusinessImgPO extends BaseDTO {
      */
     private String imgPath;
 
-
 }

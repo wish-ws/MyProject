@@ -1,6 +1,8 @@
 package com.um.controller;
 
 import com.um.cache.UserCache;
+import com.um.common.enums.AccountTypeEnum;
+import com.um.common.enums.PlatformRoleCodeEnum;
 import com.um.common.exception.ParameterException;
 import com.um.domain.dto.UserDTO;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +39,48 @@ public class BaseController{
     }
 
 
+
+    public boolean hasRecycleOrderPermission(){
+        //交易端回收订单操作，只有平台管理员和交易端操作员有权限
+        Integer accountType = this.getCurrentUser().getAccountType();
+        String roleCodes = this.getCurrentUser().getRoleCodes();
+        boolean hasPermission = false;
+        if (accountType.intValue() == AccountTypeEnum.BACK_STAGE.key
+                && (roleCodes.indexOf(PlatformRoleCodeEnum.ADMIN.code) >= 0 || roleCodes.indexOf(PlatformRoleCodeEnum.TRANSACTION_OPR.code) >= 0)
+                ) {
+            hasPermission = true;
+        }
+        return hasPermission;
+    }
+
+
+    public boolean hasTransactionOrderPermission(){
+        //交易订单操作，只有平台管理员/交易端操作员/交易端用户 有权限
+        Integer accountType = this.getCurrentUser().getAccountType();
+        String roleCodes = this.getCurrentUser().getRoleCodes();
+        boolean hasPermission = false;
+        if (accountType.intValue() == AccountTypeEnum.BACK_STAGE.key
+                && (roleCodes.indexOf(PlatformRoleCodeEnum.ADMIN.code) >= 0 || roleCodes.indexOf(PlatformRoleCodeEnum.TRANSACTION_OPR.code) >= 0)
+                ) {
+            hasPermission = true;
+        }
+        if (accountType.intValue() == AccountTypeEnum.PLATFORM.key){
+            hasPermission = true;
+        }
+        return hasPermission;
+    }
+
+
+    public boolean hasPlatformAdminPermission(){
+        //平台管理权限
+        boolean hasPermission = false;
+        Integer accountType = this.getCurrentUser().getAccountType();
+        String roleCodes = this.getCurrentUser().getRoleCodes();
+        if (accountType.intValue() == AccountTypeEnum.BACK_STAGE.key && roleCodes.indexOf(PlatformRoleCodeEnum.ADMIN.code) >= 0){
+            hasPermission = true;
+        }
+        return hasPermission;
+    }
 
 
 

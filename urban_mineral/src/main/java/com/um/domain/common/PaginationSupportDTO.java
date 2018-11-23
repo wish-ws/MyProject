@@ -60,6 +60,14 @@ public class PaginationSupportDTO<T> implements Serializable{
 		this.totalPage = pageInfo.getPages();
 	}
 
+	public void copyProperties(PageInfo pageInfo){
+		this.itemList = pageInfo.getList();
+		this.currentPage = pageInfo.getPageNum();
+		this.pageSize = pageInfo.getPageSize();
+		this.totalCount = pageInfo.getTotal();
+		this.totalPage = pageInfo.getPages();
+	}
+
 
 	public List<T> getItemList() {
 		if(null == this.itemList) this.itemList = Collections.EMPTY_LIST;

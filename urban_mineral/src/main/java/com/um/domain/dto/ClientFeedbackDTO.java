@@ -30,9 +30,9 @@ public class ClientFeedbackDTO extends BaseDTO {
     private String feedbackContent;
 
     /**
-     * 反馈人用户id
+     * 反馈人电话
      */
-    private Integer userId;
+    private String creatorAccountName;
 
 
 }

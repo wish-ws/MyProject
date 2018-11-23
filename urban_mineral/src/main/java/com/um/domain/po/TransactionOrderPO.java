@@ -2,7 +2,9 @@ package com.um.domain.po;
 
 import com.um.domain.common.BaseDTO;
 import com.um.domain.common.BaseDTO;
+import com.um.util.DateUtil;
 import lombok.Data;
+import org.apache.commons.lang.StringUtils;
 
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -27,7 +29,7 @@ public class TransactionOrderPO extends BaseDTO {
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private String orderId;
+    private Integer orderId;
 
     /**
      * 订单编码
@@ -38,18 +40,18 @@ public class TransactionOrderPO extends BaseDTO {
      * 订单类型
      * 1销售单2采购单
      */
-    private String orderType;
+    private Integer orderType;
 
     /**
      * 废品类型
      * 1废家电2废钢铁3废塑料4废玻璃5其他
      */
-    private String itemType;
+    private Integer itemType;
 
     /**
      * 废品重量
      */
-    private String itemWeight;
+    private Double itemWeight;
 
     /**
      * 废品单价
@@ -69,18 +71,18 @@ public class TransactionOrderPO extends BaseDTO {
     /**
      * 买方用户id
      */
-    private String buyerUserId;
+    private Integer buyerUserId;
 
     /**
      * 卖方用户id
      */
-    private String sellerUserId;
+    private Integer sellerUserId;
 
     /**
      * 订单状态
      * 1待接单2待交货3待结算4已完成5已取消
      */
-    private String orderStatus;
+    private Integer orderStatus;
 
     /**
      * 订单接收人
@@ -93,5 +95,10 @@ public class TransactionOrderPO extends BaseDTO {
     private String receivedTime;
 
 
-
+    public void setReceivedTime(String receivedTime) {
+        if(StringUtils.isNotEmpty(receivedTime)){
+            receivedTime = DateUtil.dateFormat(receivedTime,DateUtil.hour_format);
+        }
+        this.receivedTime = receivedTime;
+    }
 }

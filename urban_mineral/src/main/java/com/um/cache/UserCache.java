@@ -70,7 +70,8 @@ public class UserCache {
         try {
             return userCache.get(userId);
         } catch (ExecutionException e) {
-            throw new ServiceException("获取userDTO缓存失败，userId=" + userId,e);
+            log.error("获取userDTO缓存失败，userId=" + userId,e);
+            return null;
         }
     }
 

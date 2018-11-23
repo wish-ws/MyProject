@@ -2,12 +2,18 @@ package com.um.domain.dto;
 
 import com.um.domain.common.BaseDTO;
 import com.um.domain.common.BaseDTO;
+import com.um.util.DateUtil;
 import lombok.Data;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author : ws
@@ -24,7 +30,7 @@ public class TransactionOrderDTO extends BaseDTO {
     /**
      * 订单id
      */
-    private String orderId;
+    private Integer orderId;
 
     /**
      * 订单编码
@@ -35,18 +41,18 @@ public class TransactionOrderDTO extends BaseDTO {
      * 订单类型
      * 1销售单2采购单
      */
-    private String orderType;
+    private Integer orderType;
 
     /**
      * 废品类型
      * 1废家电2废钢铁3废塑料4废玻璃5其他
      */
-    private String itemType;
+    private Integer itemType;
 
     /**
      * 废品重量
      */
-    private String itemWeight;
+    private Double itemWeight;
 
     /**
      * 废品单价
@@ -66,18 +72,38 @@ public class TransactionOrderDTO extends BaseDTO {
     /**
      * 买方用户id
      */
-    private String buyerUserId;
+    private Integer buyerUserId;
+
+    /**
+     * 买方用户名
+     */
+    private String buyerUserName;
+
+    /**
+     * 买方登录名
+     */
+    private String buyerAccountName;
 
     /**
      * 卖方用户id
      */
-    private String sellerUserId;
+    private Integer sellerUserId;
+
+    /**
+     * 卖方用户名
+     */
+    private String sellerUserName;
+
+    /**
+     * 卖方登录名
+     */
+    private String sellerAccountName;
 
     /**
      * 订单状态
      * 1待接单2待交货3待结算4已完成5已取消
      */
-    private String orderStatus;
+    private Integer orderStatus;
 
     /**
      * 订单接收人
@@ -89,6 +115,26 @@ public class TransactionOrderDTO extends BaseDTO {
      */
     private String receivedTime;
 
+    /**
+     * 支付凭证
+     */
+    private List<BusinessImgDTO> businessImgDTOList;
 
 
+    private Integer currentUserId;
+
+    public void setReceivedTime(String receivedTime) {
+        if(StringUtils.isNotEmpty(receivedTime)){
+            receivedTime = DateUtil.dateFormat(receivedTime,DateUtil.hour_format);
+        }
+        this.receivedTime = receivedTime;
+    }
+
+
+    public void setBusinessImgDTOList(List<BusinessImgDTO> businessImgDTOList) {
+        if(CollectionUtils.isEmpty(businessImgDTOList)){
+            businessImgDTOList = new ArrayList<>();
+        }
+        this.businessImgDTOList = businessImgDTOList;
+    }
 }

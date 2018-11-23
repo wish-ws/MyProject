@@ -12,15 +12,15 @@ import java.util.*;
 public class DateUtil {
 
 	/**
-	 * 默认格式 yyyy/MM/dd
+	 * 默认格式 yyyy-MM-dd
 	 */
-	public static String defaultFormat = "yyyy/MM/dd";
+	public static String defaultFormat = "yyyy-MM-dd";
 
 
 	/**
 	 * 默认格式 yyyy-MM-dd hh:mm:dd
 	 */
-	public static String hour_format = "yyyy/MM/dd HH:mm:ss";
+	public static String hour_format = "yyyy-MM-dd HH:mm:ss";
 
 	/**
 	 * 小程序支持苹果手机日期格式

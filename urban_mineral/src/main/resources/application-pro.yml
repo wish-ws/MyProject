@@ -1,8 +1,8 @@
 spring:
   dataSource:
-    url: jdbc:mysql://192.168.0.188:3306/umt?characterEncoding=UTF-8&allowMultiQueries=true
-    username: suton
-    password: suton2018
+    url: jdbc:mysql://127.0.0.1:3306/cskc?characterEncoding=UTF-8&allowMultiQueries=true
+    username: cskc
+    password: fsafjsda@##12D
     driver-class-name: com.mysql.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
     filters: stat

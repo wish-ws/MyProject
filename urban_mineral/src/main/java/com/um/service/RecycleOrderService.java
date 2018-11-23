@@ -33,5 +33,11 @@ public interface RecycleOrderService {
      */
     public RecycleOrderDTO queryRecycleOrderDetail(String orderCode);
 
-
+    /**
+     * 接单，回收，结算，取消
+     * @param recycleOrderDTO
+     * @param modifyType
+     * @return
+     */
+    public String modifyRecycleOrder(RecycleOrderDTO recycleOrderDTO,Integer modifyType);
 }

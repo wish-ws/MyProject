@@ -6,8 +6,7 @@
   <select id="queryBusinessImgList" resultType="com.um.domain.dto.BusinessImgDTO">
     select
       id,
-      img_path imgPath,
-      img_name imgName
+      img_path imgPath
     from t_business_img
     where business_code = #{businessCode}
     and business_type =#{businessType}

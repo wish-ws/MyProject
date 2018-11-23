@@ -2,7 +2,9 @@ package com.um.domain.po;
 
 import com.um.domain.common.BaseDTO;
 import com.um.domain.common.BaseDTO;
+import com.um.util.DateUtil;
 import lombok.Data;
+import org.apache.commons.lang.StringUtils;
 
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -77,6 +79,25 @@ public class UserPO extends BaseDTO {
      * 行业认证内容
      */
     private String verificationContent;
+
+
+    /**
+     * 最后登陆时间
+     */
+    private String lastLoginTime;
+
+    /**
+     * 是否初始化密码
+     * 1是0否
+     */
+    private Integer isInit;
+
+    public void setLastLoginTime(String lastLoginTime) {
+        if(StringUtils.isNotEmpty(lastLoginTime)){
+            lastLoginTime = DateUtil.dateFormat(lastLoginTime,"yyyy-MM-dd HH:mm");
+        }
+        this.lastLoginTime = lastLoginTime;
+    }
 
 
 }

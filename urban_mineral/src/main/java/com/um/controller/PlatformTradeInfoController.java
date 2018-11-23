@@ -1,26 +1,20 @@
 package com.um.controller;
 
-import com.um.common.enums.AccountTypeEnum;
-import com.um.common.enums.CodePrefitEnum;
-import com.um.common.enums.RecycleOrderStatusEnum;
 import com.um.common.enums.StatusEnum;
 import com.um.domain.common.PaginationSupportDTO;
 import com.um.domain.common.Response;
-import com.um.domain.dto.RecycleOrderDTO;
 import com.um.domain.dto.TradeInfoDTO;
-import com.um.domain.request.OrderQueryRequeset;
 import com.um.domain.request.TradeInfoQueryRequest;
-import com.um.service.RecycleOrderService;
 import com.um.service.TradeInfoService;
 import com.um.util.DateUtil;
-import com.um.util.NumberUtil;
-import com.um.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Random;
+import java.util.Map;
 
 /**
  * @author : ws
@@ -64,9 +58,9 @@ public class PlatformTradeInfoController extends BaseController{
 
             StringBuffer sb = new StringBuffer();
 
-            if (null == tradeInfoDTO.getItemType()) sb.append("废品类型不能为空");
-            if (null == tradeInfoDTO.getTradeType()) sb.append("供求类型不能为空");
-            if (null == tradeInfoDTO.getContent()) sb.append("信息内容不能为空");
+            if (null == tradeInfoDTO.getItemType()) sb.append("废品类型不能为空;");
+            if (null == tradeInfoDTO.getTradeType()) sb.append("供求类型不能为空;");
+            if (null == tradeInfoDTO.getContent()) sb.append("信息内容不能为空;");
 
             if (sb.length() > 0) {
                 log.error("发布供求信息失败，原因：" + sb.toString());
@@ -85,6 +79,31 @@ public class PlatformTradeInfoController extends BaseController{
             log.error("---createTradeInfo error",e);
             response.setResult(0);
             response.setFailReason("发布供求信息失败");
+        }
+        return response;
+    }
+
+
+
+    @PostMapping("/delete")
+    public Response deleteTradeInfo(@RequestBody Map<String,Integer> paramMap){
+        Response response = new Response();
+
+        try {
+            Integer id = paramMap.get("id");
+            if(null == id){
+                log.error("删除供求信息失败，id不能为空");
+                response.setResult(0);
+                response.setFailReason("删除供求信息失败，id不能为空");
+                return response;
+            }
+
+            tradeInfoService.deleteTradeInfo(id);
+            response.setResult(1);
+        } catch(Exception e) {
+            log.error("---deleteTradeInfo error",e);
+            response.setResult(0);
+            response.setFailReason("删除供求信息失败");
         }
         return response;
     }

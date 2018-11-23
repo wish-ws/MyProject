@@ -71,7 +71,7 @@ public class RecycleOrderDTO extends BaseDTO {
     /**
      * 订单接收人
      */
-    private Integer orderReceiver;
+    private String orderReceiver;
 
     /**
      * 接收订单时间

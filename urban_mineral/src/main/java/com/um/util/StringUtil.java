@@ -205,4 +205,22 @@ public class StringUtil {
 		}
 		return content;
 	}
+
+
+	/**
+	 * 替换文本中，图片标签的高宽样式
+	 * @return
+	 */
+	public static String replaceImgStyleWidthHeight(String content){
+		String pattern = "(<img [^>]*)( (w|style|h|width|height)=\"[^\"]*\")+";
+
+		//先替换调空格
+		content = content.replaceAll("\\s*=\\s*","");
+		content = content.replaceAll(pattern,"$1");
+		content = content.replaceAll(pattern,"$1");
+		content = content.replaceAll(pattern,"$1");
+		content = content.replaceAll(pattern,"$1");
+		content = content.replaceAll(pattern,"$1");
+		return content;
+	}
 }

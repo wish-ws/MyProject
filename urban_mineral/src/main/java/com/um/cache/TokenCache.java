@@ -28,7 +28,7 @@ public class TokenCache {
     private static CacheLoader<String, Boolean> createTokenCacheLoader() {
         return new CacheLoader<String, Boolean>() {
             @Override
-            public Boolean load(String loginName) throws Exception {
+            public Boolean load(String accountName) throws Exception {
                 return false;
             }
         };

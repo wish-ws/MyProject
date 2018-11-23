@@ -1,12 +1,12 @@
 package com.um.domain.dto;
 
+import com.um.common.enums.PlatformRoleCodeEnum;
 import com.um.domain.common.BaseDTO;
+import com.um.util.DateUtil;
 import lombok.Data;
+import org.apache.commons.lang.StringUtils;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import java.util.List;
 
 /**
  * @author : ws
@@ -55,6 +55,16 @@ public class UserDTO extends BaseDTO {
     private String roleCodes;
 
     /**
+     * 角色编码拼接前端传参
+     */
+    private List<String> roleCodeList;
+
+    /**
+     * 角色名称拼接
+     */
+    private String roleNames;
+
+    /**
      * 状态1启用0禁用
      */
     private Integer status;
@@ -79,6 +89,49 @@ public class UserDTO extends BaseDTO {
      * 地址对象
      */
     private AddressDTO addressDTO;
+
+    /**
+     * 最后登陆时间
+     */
+    private String lastLoginTime;
+
+    /**
+     * 是否初始化密码
+     * 1是0否
+     */
+    private Integer isInit;
+
+    /**
+     * 注册用手机验证码
+     */
+    private String verifyCode;
+
+    public void setLastLoginTime(String lastLoginTime) {
+        if(StringUtils.isNotEmpty(lastLoginTime)){
+            lastLoginTime = DateUtil.dateFormat(lastLoginTime,"yyyy-MM-dd HH:mm");
+        }
+        this.lastLoginTime = lastLoginTime;
+    }
+
+
+    public void setRoleNames(String roleNames) {
+
+        if(StringUtils.isEmpty(roleNames)){
+            if(StringUtils.isNotEmpty(this.roleCodes)){
+                String [] roleCodeArr = this.roleCodes.split(",");
+                StringBuffer sb = new StringBuffer();
+                for (String s : roleCodeArr) {
+                    sb.append(PlatformRoleCodeEnum.getDescByCode(s)).append("、");
+                }
+                if(sb.length() > 0){
+                    this.roleNames = sb.substring(0,sb.length() - 1);
+                }
+            }
+        }else{
+            this.roleNames = roleNames;
+        }
+    }
+
 
 
 }

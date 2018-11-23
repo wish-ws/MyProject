@@ -46,7 +46,10 @@
     <if test="null != tradeType" >
       and ti.trade_type = #{tradeType}
     </if>
-
+    <if test="null != creatorUserId" >
+      and ti.creator_user_id = #{creatorUserId}
+    </if>
+    order by ti.created_time desc
   </select>
 
 

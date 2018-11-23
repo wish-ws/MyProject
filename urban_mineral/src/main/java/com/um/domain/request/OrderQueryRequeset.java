@@ -25,5 +25,10 @@ public class OrderQueryRequeset extends BaseRequest {
      */
     private Integer creatorUserId;
 
+    /**
+     * 订单编号
+     */
+    private String orderCode;
+
 
 }

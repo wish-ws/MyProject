@@ -38,10 +38,4 @@ public class BusinessImgDTO extends BaseDTO {
      */
     private String imgPath;
 
-    /**
-     * 图片名称
-     */
-    private String imgName;
-
-
 }

@@ -3,11 +3,13 @@ package com.um.domain.dto;
 import com.um.domain.common.BaseDTO;
 import com.um.domain.common.BaseDTO;
 import lombok.Data;
+import org.apache.commons.collections.CollectionUtils;
 
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -76,4 +78,10 @@ public class TradeInfoDTO extends BaseDTO {
     private String avatarImgPath;
 
 
+    public void setBusinessImgDTOList(List<BusinessImgDTO> businessImgDTOList) {
+        if(CollectionUtils.isEmpty(businessImgDTOList)){
+            businessImgDTOList = new ArrayList<>();
+        }
+        this.businessImgDTOList = businessImgDTOList;
+    }
 }

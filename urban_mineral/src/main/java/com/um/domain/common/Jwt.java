@@ -20,6 +20,7 @@ public class Jwt implements Serializable {
 	 */
 	private Integer userId;
 
+
 	/**
 	 * token解析异常，
 	 * 返回编码

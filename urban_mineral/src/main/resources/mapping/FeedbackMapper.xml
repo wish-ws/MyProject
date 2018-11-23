@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.um.mapper.FeedbackMapper">
+  
+  <select id="queryFeedbackPage" parameterType="com.um.domain.common.BaseRequest" resultType="com.um.domain.dto.ClientFeedbackDTO" >
+      select
+        feedback_content feedbackContent,
+        creator creator,
+        created_time createdTime,
+        creator_account_name creatorAccountName
+      from t_client_feedback
+      where 1=1
+        <if test="null != startDate and '' != startDate">
+          <![CDATA[ and created_time >=  DATE_FORMAT(#{startDate},'%Y-%m-%d') ]]>
+        </if>
+        <if test="null != endDate and '' != endDate">
+          <![CDATA[ and created_time <= DATE_ADD(DATE_FORMAT(#{endDate},'%Y-%m-%d'),INTERVAL 1 DAY) ]]>
+        </if>
+      order by created_time desc
+  </select>
+
+
+
+
+
+
+
+
+
+</mapper>

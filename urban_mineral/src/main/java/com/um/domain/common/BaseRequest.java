@@ -3,6 +3,7 @@ package com.um.domain.common;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * @author : Owen
@@ -24,4 +25,15 @@ public class BaseRequest implements Serializable {
      * 页面记录数
      */
     private int pageSize = 20;
+
+
+    /**
+     * 开始时间
+     */
+    private String startDate;
+
+    /**
+     * 结束时间
+     */
+    private String endDate;
 }

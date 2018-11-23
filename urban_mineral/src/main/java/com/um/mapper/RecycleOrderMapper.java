@@ -1,8 +1,12 @@
 package com.um.mapper;
 
 import com.um.common.MyMapper;
+import com.um.domain.dto.RecycleOrderDTO;
 import com.um.domain.po.RecycleOrderPO;
+import com.um.domain.request.OrderQueryRequeset;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * @author : ws
@@ -12,5 +16,6 @@ import org.springframework.stereotype.Component;
  */
 @Component("recycleOrderMapper")
 public interface RecycleOrderMapper extends MyMapper<RecycleOrderPO> {
+
 
 }

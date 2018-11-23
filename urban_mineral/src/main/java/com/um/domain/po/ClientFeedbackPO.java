@@ -34,9 +34,9 @@ public class ClientFeedbackPO extends BaseDTO {
     private String feedbackContent;
 
     /**
-     * 反馈人用户id
+     * 反馈人登录名
      */
-    private Integer userId;
+    private String creatorAccountName;
 
 
 }

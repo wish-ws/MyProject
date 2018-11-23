@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.um.mapper.UserMapper">
+
+    <select id="queryPlatformStatistics" resultType="com.um.domain.dto.PlatformStatisticsDTO" >
+        select sum(statistics.clientTotalTurnover),
+                sum(statistics.platformTotalTurnover),
+                sum(statistics.platformTotalUserQty),
+                sum(statistics.clientTotalUserQty)
+        from (
+            select
+                0 clientTotalTurnover,
+                ifnull(sum(ro.order_amount),0) platformTotalTurnover,
+                0 platformTotalUserQty,
+                0 clientTotalUserQty
+            from t_transaction_order ro
+            where <![CDATA[ ro.order_status >= 2 and ro.order_status <= 5 ]]>
+
+            union
+
+            SELECT
+                0 clientTotalTurnover,
+                0 platformTotalTurnover,
+                ifnull(sum(case when u.account_type = 3 then 1 else 0 end),0) platformTotalUserQty,
+                ifnull(sum(case when u.account_type = 2 then 1 else 0 end),0) clientTotalUserQty
+            from t_user u
+            where u.status = 1
+
+        ) statistics
+
+    </select>
+
+
+
+
+
+
+
+
+
+
+
+</mapper>

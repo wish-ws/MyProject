@@ -1,6 +1,6 @@
 spring:
   dataSource:
-    url: jdbc:mysql://192.168.0.188:3306/umt?characterEncoding=UTF-8&allowMultiQueries=true
+    url: jdbc:mysql://192.168.0.188:3306/um?characterEncoding=UTF-8&allowMultiQueries=true
     username: suton
     password: suton2018
     driver-class-name: com.mysql.jdbc.Driver

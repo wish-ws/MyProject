@@ -39,15 +39,15 @@ public class ClientRecycleController extends BaseController{
         try {
             StringBuffer sb = new StringBuffer();
             if (null == recycleOrderDTO.getItemType()) {
-                sb.append("废品类型不能为空");
+                sb.append("废品类型不能为空;");
             }
 
             if (null == recycleOrderDTO.getItemQty()) {
-                sb.append("废品数量不能为空");
+                sb.append("废品数量不能为空;");
             }
 
             if (StringUtils.isEmpty(recycleOrderDTO.getAddress())) {
-                sb.append("地址不能为空");
+                sb.append("地址不能为空;");
             }
 
             if(sb.length() > 0){
@@ -122,6 +122,10 @@ public class ClientRecycleController extends BaseController{
         }
         return response;
     }
+
+
+
+
 
 
 
