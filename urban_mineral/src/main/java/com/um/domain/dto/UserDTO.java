@@ -106,6 +106,14 @@ public class UserDTO extends BaseDTO {
      */
     private String verifyCode;
 
+    /**
+     * 1pc
+     * 2app
+     */
+    private Integer from;
+
+    private String token;
+
     public void setLastLoginTime(String lastLoginTime) {
         if(StringUtils.isNotEmpty(lastLoginTime)){
             lastLoginTime = DateUtil.dateFormat(lastLoginTime,"yyyy-MM-dd HH:mm");
@@ -114,22 +122,19 @@ public class UserDTO extends BaseDTO {
     }
 
 
-    public void setRoleNames(String roleNames) {
-
-        if(StringUtils.isEmpty(roleNames)){
-            if(StringUtils.isNotEmpty(this.roleCodes)){
-                String [] roleCodeArr = this.roleCodes.split(",");
-                StringBuffer sb = new StringBuffer();
-                for (String s : roleCodeArr) {
-                    sb.append(PlatformRoleCodeEnum.getDescByCode(s)).append("、");
-                }
-                if(sb.length() > 0){
-                    this.roleNames = sb.substring(0,sb.length() - 1);
-                }
+    public String getRoleNames() {
+        String roleNames = null;
+        if(StringUtils.isNotEmpty(this.roleCodes)){
+            String [] roleCodeArr = this.roleCodes.split(",");
+            StringBuffer sb = new StringBuffer();
+            for (String s : roleCodeArr) {
+                sb.append(PlatformRoleCodeEnum.getDescByCode(s)).append("、");
             }
-        }else{
-            this.roleNames = roleNames;
+            if(sb.length() > 0){
+                roleNames = sb.substring(0,sb.length() - 1);
+            }
         }
+        return roleNames;
     }
 
 

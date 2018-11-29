@@ -6,6 +6,8 @@ import com.google.common.cache.LoadingCache;
 import com.um.common.exception.ServiceException;
 import com.um.domain.dto.AddressDTO;
 import com.um.domain.dto.UserDTO;
+import com.um.service.UserService;
+import com.um.util.SpringContextUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -33,35 +35,9 @@ public class UserCache {
         return new CacheLoader<Integer, UserDTO>() {
             @Override
             public UserDTO load(Integer userId) throws Exception {
-
-
-                //测试代码
-                UserDTO userDTO = new UserDTO();
-                userDTO.setAccountName("wish");
-                userDTO.setAccountType(1);
-
-                userDTO.setAvatarImgPath(null);
-                userDTO.setRoleCodes("R001");
-                userDTO.setStatus(1);
-                userDTO.setUserId(1);
-                userDTO.setUserName("你松哥");
-                userDTO.setVerificationContent("钢铁");
-                userDTO.setVerificationStatus(1);
-
-                AddressDTO addressDTO = new AddressDTO();
-                addressDTO.setAddressDetail("16栋1101");
-                addressDTO.setCityCode("SZX");
-                addressDTO.setCityName("深圳");
-                addressDTO.setContactName("王松");
-                addressDTO.setContactTel("13713794964");
-                addressDTO.setId(1);
-                addressDTO.setProvinceName("广东省");
-                addressDTO.setRegionName("龙华新区");
-                addressDTO.setUserId(1);
-
-                userDTO.setAddressDTO(addressDTO);
+                UserService userService = (UserService) SpringContextUtil.getBean(UserService.class);
+                UserDTO userDTO = userService.queryUserInfoByUserId(userId);
                 return userDTO;
-                //测试代码
             }
         };
     }

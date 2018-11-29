@@ -1,21 +1,15 @@
 package com.um.controller;
 
-import com.um.cache.TokenCache;
-import com.um.common.enums.StatusEnum;
 import com.um.common.exception.ServiceException;
 import com.um.domain.common.Response;
 import com.um.domain.dto.AddressDTO;
-import com.um.domain.dto.ClientFeedbackDTO;
 import com.um.domain.dto.UserDTO;
 import com.um.service.UserService;
 import com.um.util.DateUtil;
-import com.um.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Date;
 
 /**
  * @author : ws
@@ -48,8 +42,7 @@ public class UserController extends BaseController{
                 return response;
             }
 
-            userDTO.setCreator(userDTO.getAccountName());
-            userDTO.setCreatedTime(DateUtil.getCurrentDateTimeStr());
+
             userService.registerUser(userDTO);
             response.setResult(1);
         } catch (ServiceException se) {
@@ -106,12 +99,12 @@ public class UserController extends BaseController{
         Response response = new Response();
 
         try {
-            if(StringUtils.isEmpty(userDTO.getAccountName()) || null == userDTO.getAccountType()
+            if(null == userDTO.getFrom() || StringUtils.isEmpty(userDTO.getAccountName()) || null == userDTO.getAccountType()
                     || (StringUtils.isEmpty(userDTO.getPassword()) && StringUtils.isEmpty(userDTO.getVerifyCode()))
                     ){
-                log.error("登陆失败，登录名不能为空,密码或验证码其中一个不能为空");
+                log.error("登陆失败，登陆来源不能为空，登录名不能为空,密码或验证码其中一个不能为空");
                 response.setResult(0);
-                response.setFailReason("登陆失败，登录名不能为空,密码或验证码其中一个不能为空");
+                response.setFailReason("登陆失败，登陆来源不能为空，登录名不能为空,密码或验证码其中一个不能为空");
                 return response;
             }
 
@@ -142,14 +135,14 @@ public class UserController extends BaseController{
                     || StringUtils.isEmpty(userDTO.getPassword())
                     || StringUtils.isEmpty(userDTO.getVerifyCode())
                     || null == userDTO.getAccountType()){
-                log.error("重置密码失败，登录名、密码、验证码不能为空");
+                log.error("重置密码失败，登录名、密码、验证码、用户类型不能为空");
                 response.setResult(0);
-                response.setFailReason("重置密码失败，登录名、密码、验证码不能为空");
+                response.setFailReason("重置密码失败，登录名、密码、验证码、用户类型不能为空");
                 return response;
             }
 
             userService.resetPassword(userDTO);
-
+            response.setResult(1);
         } catch (ServiceException se) {
             log.error("重置密码失败",se);
             response.setResult(0);
@@ -167,7 +160,7 @@ public class UserController extends BaseController{
 
 
     @GetMapping("/info/{userId}")
-    public Response queryUserInfoByAccountName(@PathVariable Integer userId){
+    public Response queryUserInfoByUserId(@PathVariable Integer userId){
 
         Response response = new Response();
 

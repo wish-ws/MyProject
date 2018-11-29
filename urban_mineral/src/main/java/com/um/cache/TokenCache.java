@@ -3,7 +3,9 @@ package com.um.cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.um.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.ExecutionException;
@@ -11,7 +13,7 @@ import java.util.concurrent.ExecutionException;
 /**
  * @author : ws
  * @project : com.um
- * @description : token缓存，后台控制token有效性
+ * @description : token缓存，后台控制token有效性（启用/禁用用户，重置密码，退出登陆……）
  * @date : 2018年11月12日18:23:10
  */
 @Slf4j
@@ -19,42 +21,40 @@ import java.util.concurrent.ExecutionException;
 public class TokenCache {
 
 
-    static LoadingCache<String, Boolean> tokenCache = CacheBuilder.newBuilder()
+    static LoadingCache<Integer, String> tokenCache = CacheBuilder.newBuilder()
             .maximumSize(2000)
-//            .expireAfterWrite(10L, TimeUnit.DAYS)
             .build(createTokenCacheLoader());
 
 
-    private static CacheLoader<String, Boolean> createTokenCacheLoader() {
-        return new CacheLoader<String, Boolean>() {
+    private static CacheLoader<Integer, String> createTokenCacheLoader() {
+        return new CacheLoader<Integer, String>() {
             @Override
-            public Boolean load(String accountName) throws Exception {
-                return false;
+            public String load(Integer userId) throws Exception {
+                return null;
             }
         };
     }
 
-    public static boolean isExist(String token) {
+    public static boolean isExist(Integer userId) {
         try {
-            Boolean flag = tokenCache.get(token);
-            if(null == flag){
+            String token = tokenCache.get(userId);
+            if(StringUtils.isEmpty(token)){
                 return false;
             }else{
-                return flag;
+                return true;
             }
-        } catch (ExecutionException e) {
+        } catch (Exception e) {
             log.error("获取token缓存失败",e);
             return false;
         }
     }
 
-    public static void putTokenToCache(String token,boolean flag){
-        tokenCache.put(token,flag);
+    public static void put(Integer userId,String token){
+        tokenCache.put(userId,token);
     }
 
-    public static void removeTokenCache(String token){
-        tokenCache.invalidate(token);
+    public static void remove(Integer userId){
+        tokenCache.invalidate(userId);
     }
-
 
 }

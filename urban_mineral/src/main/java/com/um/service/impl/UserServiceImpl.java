@@ -2,11 +2,13 @@ package com.um.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.um.cache.TokenCache;
 import com.um.cache.UserCache;
 import com.um.cache.VerifyCodeCache;
 import com.um.common.config.SmsConfig;
 import com.um.common.enums.StatusEnum;
 import com.um.common.exception.ServiceException;
+import com.um.domain.common.Jwt;
 import com.um.domain.common.PaginationSupportDTO;
 import com.um.domain.dto.AddressDTO;
 import com.um.domain.dto.UserDTO;
@@ -155,6 +157,12 @@ public class UserServiceImpl implements UserService {
         userPO.setUserId(userDTO.getUserId());
         userPO.setStatus(userDTO.getStatus());
         userMapper.updateByPrimaryKeySelective(userPO);
+
+        if(StatusEnum.INVALID.key == userDTO.getStatus()){
+            //禁用用户，立即清除token，避免访问系统
+            TokenCache.remove(userDTO.getUserId());
+        }
+
         //移除缓存，下次重新加载
         this.removeUserCache(userDTO.getUserId());
     }
@@ -189,6 +197,17 @@ public class UserServiceImpl implements UserService {
             throw new ServiceException("注册失败，此手机号已经注册过");
         }
 
+        String cacheVerifyCode = VerifyCodeCache.get(userDTO.getAccountName());
+
+        if(StringUtils.isEmpty(cacheVerifyCode)){
+            log.error("验证码已失效，请稍后重发");
+            throw new ServiceException("验证码已失效，请稍后重发");
+        }
+        if(!cacheVerifyCode.equals(userDTO.getVerifyCode())){
+            log.error("验证码错误");
+            throw new ServiceException("验证码错误");
+        }
+
         //2、注册
         String salt = NumberUtil.generateNumber(4);
         String encryptPwd = Md5Util.md5Encode(userDTO.getPassword() + salt);
@@ -216,6 +235,7 @@ public class UserServiceImpl implements UserService {
 
         if(StringUtils.isNotEmpty(userDTO.getVerifyCode())){
             String cacheVerifyCode = VerifyCodeCache.get(userDTO.getAccountName());
+
             if(StringUtils.isEmpty(cacheVerifyCode)){
                 log.error("验证码已失效，请稍后重发");
                 throw new ServiceException("验证码已失效，请稍后重发");
@@ -233,12 +253,21 @@ public class UserServiceImpl implements UserService {
                 userInsert.setAccountName(userDTO.getAccountName());
                 userInsert.setUserName(userDTO.getAccountName());
                 userInsert.setStatus(StatusEnum.VALID.key);
-                userInsert.setCreatedTime(userDTO.getCreatedTime());
-                userInsert.setCreator(userDTO.getCreator());
+                userInsert.setCreatedTime(DateUtil.getCurrentDateTimeStr());
+                userInsert.setCreator(userDTO.getAccountName());
                 userInsert.setIsInit(0);
                 userInsert.setVerificationStatus(0);
+
+                //设置默认密码，因为数据库密码不为空，但依然首次登陆需要初始化密码
+                String pwd = NumberUtil.DEFAULT_PWD;
+                String salt = NumberUtil.generateNumber(4);
+                String encryptPwd = Md5Util.md5Encode(pwd+salt);
+                userInsert.setPassword(encryptPwd);
+                userInsert.setSalt(salt);
+
                 userMapper.insert(userInsert);
-                userPO.setUserId(userInsert.getUserId());
+
+                userPO = userInsert;
             }else{
                 //判断用户有效性
                 if(StatusEnum.INVALID.key == userPO.getStatus()){
@@ -283,6 +312,31 @@ public class UserServiceImpl implements UserService {
         userDB.setAddressDTO(BeanUtil.transformBean(addressPO,AddressDTO.class));
         userDB.setPassword(null);
         userDB.setSalt(null);
+
+        //生成token并返回
+        Jwt jwt = new Jwt();
+        jwt.setUserId(userPO.getUserId());
+        if(1 == userDTO.getFrom()){
+            //pc    2天有效期
+            jwt.setExpiredMillisecond(2*24*60*60*1000);
+        }else if(2 == userDTO.getFrom()){
+            //app   90天有效期
+            jwt.setExpiredMillisecond(90*24*60*60*1000);
+        }
+
+        String token = null;
+        try {
+            token = JwtUtil.createJWT(jwt);
+        } catch (Exception e) {
+            log.error("登陆异常，token创建异常",e);
+            throw new ServiceException("登陆失败，请重试");
+        }
+
+        //保存用户缓存
+        UserCache.putUserToCache(userPO.getUserId(),userDB);
+        userDB.setToken(token);
+        //保存token缓存
+        TokenCache.put(userPO.getUserId(),token);
         return userDB;
     }
 
@@ -368,6 +422,11 @@ public class UserServiceImpl implements UserService {
         criteria.andEqualTo("accountName",userDTO.getAccountName());
         userMapper.updateByExampleSelective(userPO,example);
 
+        //清除用户token缓存，下次重新登陆
+        UserPO userSelect = new UserPO();
+        userSelect.setAccountName(userDTO.getAccountName());
+        userSelect = userMapper.selectOne(userSelect);
+        TokenCache.remove(userSelect.getUserId());
     }
 
     @Override

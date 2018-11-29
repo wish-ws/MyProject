@@ -108,6 +108,8 @@ public class UploadController extends BaseController{
                 Map<String,String> resMap = new HashMap<>();
                 resMap.put("state","SUCCESS");
                 resMap.put("url",prefix + imgAccessPath);
+                resMap.put("title",fileName);
+                resMap.put("original",fileName);
                 log.info("百度富文本上传路径：" + (prefix + imgAccessPath));
 
                 return JSON.toJSONString(resMap);
