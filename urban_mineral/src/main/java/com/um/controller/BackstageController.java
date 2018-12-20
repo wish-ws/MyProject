@@ -1,6 +1,5 @@
 package com.um.controller;
 
-import com.um.common.constants.ImgConstant;
 import com.um.common.exception.ServiceException;
 import com.um.domain.common.BaseRequest;
 import com.um.domain.common.PaginationSupportDTO;
@@ -11,20 +10,13 @@ import com.um.domain.request.OrderQueryRequeset;
 import com.um.domain.request.UserQueryRequest;
 import com.um.service.*;
 import com.um.util.DateUtil;
-import com.um.util.NumberUtil;
 import com.um.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.File;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 
 /**

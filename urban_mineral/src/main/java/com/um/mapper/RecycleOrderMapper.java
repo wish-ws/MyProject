@@ -17,5 +17,6 @@ import java.util.List;
 @Component("recycleOrderMapper")
 public interface RecycleOrderMapper extends MyMapper<RecycleOrderPO> {
 
+    public List<RecycleOrderDTO> queryRecycleOrderPage(OrderQueryRequeset orderQueryRequeset);
 
 }

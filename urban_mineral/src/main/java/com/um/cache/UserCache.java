@@ -27,6 +27,7 @@ public class UserCache {
 
     static LoadingCache<Integer, UserDTO> userCache = CacheBuilder.newBuilder()
             .maximumSize(2000)
+            .initialCapacity(10)
             .expireAfterWrite(10L, TimeUnit.DAYS)
             .build(createUserCacheLoader());
 
@@ -45,7 +46,7 @@ public class UserCache {
     public static UserDTO getCachedUserDTO(Integer userId) {
         try {
             return userCache.get(userId);
-        } catch (ExecutionException e) {
+        } catch (Exception e) {
             log.error("获取userDTO缓存失败，userId=" + userId,e);
             return null;
         }

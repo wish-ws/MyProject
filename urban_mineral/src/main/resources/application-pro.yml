@@ -19,7 +19,7 @@ spring:
     poolPreparedStatements: true
     maxOpenPreparedStatements: 20
   jackson:
-      time-zone: GMT+8
+    time-zone: GMT+8
 
 
 

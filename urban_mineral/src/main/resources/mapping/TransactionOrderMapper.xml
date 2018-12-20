@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.um.mapper.TransactionOrderMapper">
+
+
+    <select id="queryTransactionOrderPage" parameterType="com.um.domain.request.OrderQueryRequeset" resultType="com.um.domain.dto.TransactionOrderDTO" >
+      select
+        o.item_type itemType,
+        o.item_weight itemWeight,
+        o.item_price itemPrice,
+        o.order_amount orderAmount,
+        o.order_status orderStatus,
+        o.order_code orderCode,
+        o.seller_user_id sellerUserId,
+        selluser.user_name sellerUserName,
+        selluser.account_name sellerAccountName,
+        o.buyer_user_id buyerUserId,
+        buyuser.user_name buyerUserName,
+        buyuser.account_name buyerAccountName
+      from t_transaction_order o
+      left join t_user buyuser on o.buyer_user_id = buyuser.user_id
+      left join t_user selluser on o.seller_user_id = selluser.user_id
+      where 1=1
+      <if test="null != orderStatus" >
+          <if test="3 == orderStatus">
+            and (o.order_status = 3 or o.order_status = 4)
+          </if>
+          <if test="3 != orderStatus">
+            and o.order_status = #{orderStatus}
+          </if>
+      </if>
+      <if test="null != creatorUserId and '' != creatorUserId and null != orderType" >
+        <if test="1 == orderType" >
+          and o.seller_user_id = #{creatorUserId}
+        </if>
+        <if test="2 == orderType" >
+            and o.buyer_user_id = #{creatorUserId}
+        </if>
+      </if>
+
+      order by o.created_time desc
+    </select>
+
+
+
+
+
+
+</mapper>

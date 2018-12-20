@@ -16,7 +16,9 @@ import com.um.mapper.UserMapper;
 import com.um.service.BackstageService;
 import com.um.util.BeanUtil;
 import com.um.util.DateUtil;
+import com.um.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,7 +63,7 @@ public class BackstageServiceImpl implements BackstageService {
         return paginationSupportDTO;
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void addFeedback(ClientFeedbackDTO clientFeedbackDTO) {
         ClientFeedbackPO feedbackPO = BeanUtil.transformBean(clientFeedbackDTO,ClientFeedbackPO.class);
@@ -77,9 +79,16 @@ public class BackstageServiceImpl implements BackstageService {
         example.selectProperties("createdTime","creator","logContent");
         example.setOrderByClause("created_time desc");
         Example.Criteria criteria = example.createCriteria();
-        criteria.andGreaterThanOrEqualTo("createdTime",logQueryRequest.getStartDate());
-        criteria.andLessThanOrEqualTo("createdTime",DateUtil.getDate(DateUtil.stringToDate(logQueryRequest.getEndDate()),1,0));
-        criteria.andEqualTo("creatorAccountName",logQueryRequest.getAccountName());
+
+        if(StringUtils.isNotEmpty(logQueryRequest.getStartDate())){
+            criteria.andGreaterThanOrEqualTo("createdTime",logQueryRequest.getStartDate());
+        }
+        if(StringUtils.isNotEmpty(logQueryRequest.getEndDate())){
+            criteria.andLessThanOrEqualTo("createdTime",DateUtil.getDate(DateUtil.stringToDate(logQueryRequest.getEndDate()),1,0));
+        }
+        if(StringUtils.isNotEmpty(logQueryRequest.getAccountName())){
+            criteria.andEqualTo("creatorAccountName",logQueryRequest.getAccountName());
+        }
 
         List<SystemLogPO> systemLogPOList = systemLogMapper.selectByExample(example);
 

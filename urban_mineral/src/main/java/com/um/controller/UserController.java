@@ -1,11 +1,13 @@
 package com.um.controller;
 
+import com.um.common.enums.VerificationStatusEnum;
 import com.um.common.exception.ServiceException;
 import com.um.domain.common.Response;
 import com.um.domain.dto.AddressDTO;
 import com.um.domain.dto.UserDTO;
 import com.um.service.UserService;
 import com.um.util.DateUtil;
+import com.um.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -196,6 +198,12 @@ public class UserController extends BaseController{
                 return response;
             }
 
+            if(StringUtils.isNotEmpty(userDTO.getVerificationContent())){
+                userDTO.setVerificationStatus(VerificationStatusEnum.YES.key);
+            }
+
+            userDTO.setModifier(super.getCurrentUser().getUserName());
+            userDTO.setModifiedTime(DateUtil.getCurrentDateTimeStr());
             userService.modifyUser(userDTO);
             response.setResult(1);
 

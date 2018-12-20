@@ -56,33 +56,10 @@ public class RecycleOrderServiceImpl implements RecycleOrderService {
         PaginationSupportDTO<RecycleOrderDTO> paginationSupportDTO = new PaginationSupportDTO();
         PageHelper.startPage(orderQueryRequeset.getCurrentPage(), orderQueryRequeset.getPageSize());
 
-        Example example = new Example(RecycleOrderPO.class);
-        example.selectProperties("itemType","itemQty","orderStatus","orderCode");
-        Example.Criteria criteria = example.createCriteria();
+        List<RecycleOrderDTO> recycleOrderDTOList = recycleOrderMapper.queryRecycleOrderPage(orderQueryRequeset);
 
-        //pt用户查所有，用户端用户查自己的
-        if(null != orderQueryRequeset.getCreatorUserId()){
-            criteria.andEqualTo("creatorUserId",orderQueryRequeset.getCreatorUserId());
-        }
-
-        //状态条件
-        if(null != orderQueryRequeset.getOrderStatus()){
-            criteria.andEqualTo("orderStatus",orderQueryRequeset.getOrderStatus());
-        }
-
-        //订单号
-        if(StringUtils.isNotEmpty(orderQueryRequeset.getOrderCode())){
-            criteria.andEqualTo("orderCode",orderQueryRequeset.getOrderCode());
-        }
-
-
-        example.setOrderByClause("created_time desc");
-
-
-        List<RecycleOrderPO> recycleOrderPOList = recycleOrderMapper.selectByExample(example);
-
-        PageInfo<RecycleOrderPO> pageInfo = new PageInfo<>(recycleOrderPOList);
-        paginationSupportDTO.copyProperties(pageInfo,RecycleOrderDTO.class);
+        PageInfo<RecycleOrderDTO> pageInfo = new PageInfo<>(recycleOrderDTOList);
+        paginationSupportDTO.copyProperties(pageInfo);
         return paginationSupportDTO;
 
     }
@@ -106,7 +83,7 @@ public class RecycleOrderServiceImpl implements RecycleOrderService {
         return recycleOrderDTO;
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public String modifyRecycleOrder(RecycleOrderDTO recycleOrderDTO, Integer modifyType) {
         String msg = null;

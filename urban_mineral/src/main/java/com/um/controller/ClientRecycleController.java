@@ -15,6 +15,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.Random;
 
 /**
@@ -124,6 +125,45 @@ public class ClientRecycleController extends BaseController{
     }
 
 
+    @PostMapping("/cancel")
+    public Response cancelRecycleOrder(@RequestBody Map<String,String> paramMap){
+        Response response = new Response();
+
+        try {
+
+            if(!super.hasRecycleOrderPermission()){
+                response.setResult(0);
+                response.setFailReason("当前用户没有权限访问");
+                return response;
+            }
+
+            String orderCode = paramMap.get("orderCode");
+
+            if(StringUtils.isEmpty(orderCode)){
+                log.error("取消订单失败，订单号不能为空");
+                response.setResult(0);
+                response.setFailReason("取消订单失败，订单号不能为空");
+                return response;
+            }
+            RecycleOrderDTO recycleOrderDTO = new RecycleOrderDTO();
+            recycleOrderDTO.setOrderCode(orderCode);
+            recycleOrderDTO.setModifier(super.getCurrentUser().getUserName());
+            recycleOrderDTO.setModifiedTime(DateUtil.getCurrentDateTimeStr());
+            String msg = recycleOrderService.modifyRecycleOrder(recycleOrderDTO,PlatformOrderController.OperateROrderType.cancel);
+            if(StringUtils.isEmpty(msg)){
+                response.setResult(1);
+            }else{
+                log.error("取消回收订单失败："+msg);
+                response.setResult(0);
+                response.setFailReason(msg);
+            }
+        } catch(Exception e) {
+            log.error("---queryRecycleOrderDetail error",e);
+            response.setResult(0);
+            response.setFailReason("取消回收订单失败");
+        }
+        return response;
+    }
 
 
 

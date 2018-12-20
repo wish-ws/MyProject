@@ -7,6 +7,7 @@ import com.um.common.enums.ErrorCodeEnum;
 import com.um.domain.common.Jwt;
 import com.um.service.UserService;
 import com.um.util.JwtUtil;
+import com.um.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
         String requestURI = request.getRequestURI();
+        String contextPath = request.getContextPath();
 
         //判断接口是否带参token
         String token = request.getHeader("Authorization");
@@ -49,23 +51,31 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
             response.getWriter().print(ErrorCodeEnum.UN_LOGIN.errorNo);
             return false;
         }
+
         Integer userId = jwt.getUserId();
 
 
         //判断token后台是否有效
-        boolean isExist = TokenCache.isExist(userId);
-        if(!isExist){
+        String cacheToken = TokenCache.get(userId);
+        if(StringUtils.isEmpty(cacheToken) ){
             log.error(userId + "---该用户登录超时");
+            response.getWriter().print(ErrorCodeEnum.UN_LOGIN.errorNo);
+            return false;
+        }
+
+        //只取用最新的token,避免多人同时登陆
+        if(!cacheToken.equals(token)){
+            log.error(userId + "---该用户已在其他设备登陆");
             response.getWriter().print(ErrorCodeEnum.UN_LOGIN.errorNo);
             return false;
         }
 
 
         //退出登陆
-        if(requestURI.equals("/*/logout")){
+        if(requestURI.equals(contextPath + "/user/logout")){
             //移除登陆token缓存
             TokenCache.remove(userId);
-            log.error(userId + "---该用户已经退出登陆");
+            log.info(userId + "---该用户退出登陆");
             response.getWriter().print(ErrorCodeEnum.UN_LOGIN.errorNo);
             return false;
         }

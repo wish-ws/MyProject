@@ -38,7 +38,7 @@
     left join t_user_address ua on ti.creator_user_id = ua.user_id
     where ti.status = 1
     <if test="null != cityName and '' != cityName" >
-      and ua.city_name = #{cityName}
+      and ua.city_name like  CONCAT('%',#{cityName},'%')
     </if>
     <if test="null != itemType" >
       and ti.item_type = #{itemType}

@@ -4,10 +4,10 @@
 <mapper namespace="com.um.mapper.UserMapper">
 
     <select id="queryPlatformStatistics" resultType="com.um.domain.dto.PlatformStatisticsDTO" >
-        select sum(statistics.clientTotalTurnover),
-                sum(statistics.platformTotalTurnover),
-                sum(statistics.platformTotalUserQty),
-                sum(statistics.clientTotalUserQty)
+        select sum(statistics.clientTotalTurnover) clientTotalTurnover,
+                sum(statistics.platformTotalTurnover) platformTotalTurnover,
+                sum(statistics.platformTotalUserQty) platformTotalUserQty,
+                sum(statistics.clientTotalUserQty) clientTotalUserQty
         from (
             select
                 0 clientTotalTurnover,

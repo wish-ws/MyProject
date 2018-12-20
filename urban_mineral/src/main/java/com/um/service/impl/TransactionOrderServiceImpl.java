@@ -5,6 +5,7 @@ import com.github.pagehelper.PageInfo;
 import com.um.common.enums.ImgBusinessTypeEnum;
 import com.um.common.enums.OrderTypeEnum;
 import com.um.common.enums.TransactionOrderStatusEnum;
+import com.um.common.enums.VerificationStatusEnum;
 import com.um.common.exception.ServiceException;
 import com.um.domain.common.PaginationSupportDTO;
 import com.um.domain.dto.BusinessImgDTO;
@@ -48,9 +49,16 @@ public class TransactionOrderServiceImpl implements TransactionOrderService {
     private BusinessImgMapper businessImgMapper;
 
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void createTransactionOrder(TransactionOrderDTO transactionOrderDTO) {
+
+        //判断行业认证
+        UserPO userPO = userMapper.selectByPrimaryKey(transactionOrderDTO.getCreatorUserId());
+        if(VerificationStatusEnum.NO.key == userPO.getVerificationStatus()){
+            log.error(transactionOrderDTO.getCreator() + "未认证，尚不可下单");
+            throw new ServiceException("联系我们，马上认证即可下单");
+        }
 
         TransactionOrderPO transactionOrderPO = BeanUtil.transformBean(transactionOrderDTO,TransactionOrderPO.class);
         transactionOrderMapper.insert(transactionOrderPO);
@@ -62,27 +70,10 @@ public class TransactionOrderServiceImpl implements TransactionOrderService {
         PaginationSupportDTO<TransactionOrderDTO> paginationSupportDTO = new PaginationSupportDTO();
         PageHelper.startPage(orderQueryRequeset.getCurrentPage(), orderQueryRequeset.getPageSize());
 
-        Example example = new Example(TransactionOrderPO.class);
-        example.selectProperties("itemType","itemWeight","itemPrice","orderAmount","orderStatus","orderCode");
-        Example.Criteria criteria = example.createCriteria();
+        List<TransactionOrderDTO> transactionOrderDTOList = transactionOrderMapper.queryTransactionOrderPage(orderQueryRequeset);
 
-        //pt用户查所有，用户端用户查自己的
-        if(null != orderQueryRequeset.getCreatorUserId()){
-            criteria.andEqualTo("creatorUserId",orderQueryRequeset.getCreatorUserId());
-        }
-
-        //状态条件
-        if(null != orderQueryRequeset.getOrderStatus()){
-            criteria.andEqualTo("orderStatus",orderQueryRequeset.getOrderStatus());
-        }
-
-        example.setOrderByClause("created_time desc");
-
-
-        List<TransactionOrderPO> transactionOrderPOList = transactionOrderMapper.selectByExample(example);
-
-        PageInfo<TransactionOrderPO> pageInfo = new PageInfo<>(transactionOrderPOList);
-        paginationSupportDTO.copyProperties(pageInfo,TransactionOrderDTO.class);
+        PageInfo<TransactionOrderDTO> pageInfo = new PageInfo<>(transactionOrderDTOList);
+        paginationSupportDTO.copyProperties(pageInfo);
         return paginationSupportDTO;
     }
 
@@ -121,7 +112,7 @@ public class TransactionOrderServiceImpl implements TransactionOrderService {
     }
 
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public String modifyTransactionOrder(TransactionOrderDTO transactionOrderDTO, Integer modifyType) {
         String msg = null;
@@ -148,11 +139,6 @@ public class TransactionOrderServiceImpl implements TransactionOrderService {
                 orderUpdate.setOrderStatus(TransactionOrderStatusEnum.WAIT_FOR_DELIVER.key);
                 orderUpdate.setOrderReceiver(transactionOrderDTO.getModifier());
                 orderUpdate.setReceivedTime(transactionOrderDTO.getModifiedTime());
-                if(OrderTypeEnum.SALE.key == transactionOrderPO.getOrderType()){
-                    orderUpdate.setBuyerUserId(transactionOrderDTO.getCurrentUserId());
-                }else if(OrderTypeEnum.PURCHASE.key == transactionOrderPO.getOrderType()){
-                    orderUpdate.setSellerUserId(transactionOrderDTO.getCurrentUserId());
-                }
                 break;
             //交货操作
             case 2:
@@ -175,6 +161,8 @@ public class TransactionOrderServiceImpl implements TransactionOrderService {
                         businessImgPO.setBusinessCode(transactionOrderDTO.getOrderCode());
                         businessImgPO.setBusinessType(ImgBusinessTypeEnum.STATEMENT.key);
                         businessImgPO.setImgPath(businessImgDTO.getImgPath());
+                        businessImgPO.setCreator(transactionOrderDTO.getModifier());
+                        businessImgPO.setCreatedTime(transactionOrderDTO.getModifiedTime());
                         businessImgPOList.add(businessImgPO);
                     }
                 }

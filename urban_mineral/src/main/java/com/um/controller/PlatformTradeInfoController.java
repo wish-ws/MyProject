@@ -1,6 +1,7 @@
 package com.um.controller;
 
 import com.um.common.enums.StatusEnum;
+import com.um.common.exception.ServiceException;
 import com.um.domain.common.PaginationSupportDTO;
 import com.um.domain.common.Response;
 import com.um.domain.dto.TradeInfoDTO;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.xml.ws.Service;
 import java.util.Map;
 
 /**
@@ -75,7 +77,11 @@ public class PlatformTradeInfoController extends BaseController{
             tradeInfoDTO.setCreatedTime(DateUtil.getCurrentDateTimeStr());
             tradeInfoService.createTradeInfo(tradeInfoDTO);
             response.setResult(1);
-        } catch(Exception e) {
+        } catch (ServiceException se){
+            log.error("---createTradeInfo error",se);
+            response.setResult(0);
+            response.setFailReason(se.getMessage());
+        } catch (Exception e) {
             log.error("---createTradeInfo error",e);
             response.setResult(0);
             response.setFailReason("发布供求信息失败");

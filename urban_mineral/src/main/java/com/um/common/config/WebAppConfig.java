@@ -7,6 +7,7 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 /**
@@ -14,7 +15,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
  * Created by ws on 2018/11/12.
  */
 @SpringBootConfiguration
-public class WebAppConfig extends WebMvcConfigurerAdapter {
+public class WebAppConfig implements WebMvcConfigurer {
 
     /**
      * @description: 注册拦截器
@@ -28,7 +29,12 @@ public class WebAppConfig extends WebMvcConfigurerAdapter {
                 .excludePathPatterns("/*/login")
                 .excludePathPatterns("/*/register")
                 .excludePathPatterns("/*/verifycode/send/*")
-                .excludePathPatterns("/*/password/reset");
+                .excludePathPatterns("/*/password/reset")
+                .excludePathPatterns("/*/news/page")
+                .excludePathPatterns("/*/news/detail/*")
+                .excludePathPatterns("/platform/tradeInfo/page")
+                .excludePathPatterns("/platform/config")
+                .excludePathPatterns("/*/upload/*");
     }
 
 

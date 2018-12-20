@@ -21,6 +21,7 @@ public class VerifyCodeCache {
 
     static LoadingCache<String, String> verifyCodeCache = CacheBuilder.newBuilder()
             .maximumSize(2000)
+            .initialCapacity(10)
             .expireAfterAccess(60L, TimeUnit.SECONDS)//60s不读写就过期了
             .build(createVerifyCodeCacheLoader());
 

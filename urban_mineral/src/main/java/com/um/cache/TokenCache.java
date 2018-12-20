@@ -23,6 +23,7 @@ public class TokenCache {
 
     static LoadingCache<Integer, String> tokenCache = CacheBuilder.newBuilder()
             .maximumSize(2000)
+            .initialCapacity(10)
             .build(createTokenCacheLoader());
 
 
@@ -46,6 +47,15 @@ public class TokenCache {
         } catch (Exception e) {
             log.error("获取token缓存失败",e);
             return false;
+        }
+    }
+
+    public static String get(Integer userId){
+        try {
+            return tokenCache.get(userId);
+        } catch (Exception e) {
+            log.error("获取token缓存失败，userId=" + userId,e);
+            return null;
         }
     }
 

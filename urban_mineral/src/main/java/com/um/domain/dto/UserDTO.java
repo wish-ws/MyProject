@@ -1,7 +1,10 @@
 package com.um.domain.dto;
 
+import com.alibaba.fastjson.JSON;
 import com.um.common.enums.PlatformRoleCodeEnum;
 import com.um.domain.common.BaseDTO;
+import com.um.domain.po.AddressPO;
+import com.um.util.BeanUtil;
 import com.um.util.DateUtil;
 import lombok.Data;
 import org.apache.commons.lang.StringUtils;
@@ -137,6 +140,13 @@ public class UserDTO extends BaseDTO {
         return roleNames;
     }
 
+
+    public AddressDTO getAddressDTO() {
+        if(null == addressDTO){
+            return new AddressDTO();
+        }
+        return addressDTO;
+    }
 
 
 }

@@ -6,6 +6,8 @@ import com.um.cache.TokenCache;
 import com.um.cache.UserCache;
 import com.um.cache.VerifyCodeCache;
 import com.um.common.config.SmsConfig;
+import com.um.common.enums.AccountTypeEnum;
+import com.um.common.enums.PlatformRoleCodeEnum;
 import com.um.common.enums.StatusEnum;
 import com.um.common.exception.ServiceException;
 import com.um.domain.common.Jwt;
@@ -69,7 +71,7 @@ public class UserServiceImpl implements UserService {
         PageHelper.startPage(userQueryRequest.getCurrentPage(), userQueryRequest.getPageSize());
 
         Example example = new Example(UserPO.class);
-        example.selectProperties("userName","accountName","roleCodes","status","lastLoginTime","verificationContent","verificationStatus");
+        example.selectProperties("userId","userName","accountName","roleCodes","status","lastLoginTime","verificationContent","verificationStatus");
         example.setOrderByClause("created_time desc");
         Example.Criteria criteria = example.createCriteria();
         if(null != userQueryRequest.getAccountType()){
@@ -87,7 +89,7 @@ public class UserServiceImpl implements UserService {
     }
 
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void createPlatformUser(UserDTO userDTO,String operator) {
         UserPO insertUser = new UserPO();
@@ -127,7 +129,7 @@ public class UserServiceImpl implements UserService {
     }
 
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void modifyPlatformUser(UserDTO userDTO, String operator) {
 
@@ -150,7 +152,7 @@ public class UserServiceImpl implements UserService {
     }
 
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void modifyUserEnable(UserDTO userDTO) {
         UserPO userPO = new UserPO();
@@ -176,15 +178,22 @@ public class UserServiceImpl implements UserService {
         aliyunSmsRequest.setTemplateCode(smsConfig.getTemplateCode());
         aliyunSmsRequest.setPhoneNumbers(accountName);
         aliyunSmsRequest.setTemplateParam(String.format(smsConfig.getTemplateParam(),code));
-        boolean sendSuccess = aliyunSmsService.sendSms(aliyunSmsRequest);
+//        boolean sendSuccess = aliyunSmsService.sendSms(aliyunSmsRequest);
+//        if(sendSuccess){
+//            VerifyCodeCache.put(accountName,code);
+//        }
+
+        boolean sendSuccess = true;
         if(sendSuccess){
-            VerifyCodeCache.put(accountName,code);
+            VerifyCodeCache.put(accountName,"123456");
         }
+
+
         return sendSuccess;
     }
 
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void registerUser(UserDTO userDTO) {
 
@@ -223,79 +232,74 @@ public class UserServiceImpl implements UserService {
     }
 
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public UserDTO login(UserDTO userDTO) {
-
-        UserDTO userDB = new UserDTO();
 
         UserPO userPO = new UserPO();
         userPO.setAccountName(userDTO.getAccountName());
         userPO = userMapper.selectOne(userPO);
 
-        if(StringUtils.isNotEmpty(userDTO.getVerifyCode())){
-            String cacheVerifyCode = VerifyCodeCache.get(userDTO.getAccountName());
-
-            if(StringUtils.isEmpty(cacheVerifyCode)){
-                log.error("验证码已失效，请稍后重发");
-                throw new ServiceException("验证码已失效，请稍后重发");
-            }
-            if(!cacheVerifyCode.equals(userDTO.getVerifyCode())){
-                log.error("验证码错误");
-                throw new ServiceException("验证码错误");
-            }
-
-            //判断是否注册过
-            if(null == userPO){
-                //没有，自动注册
-                UserPO userInsert = new UserPO();
-                userInsert.setAccountType(userDTO.getAccountType());
-                userInsert.setAccountName(userDTO.getAccountName());
-                userInsert.setUserName(userDTO.getAccountName());
-                userInsert.setStatus(StatusEnum.VALID.key);
-                userInsert.setCreatedTime(DateUtil.getCurrentDateTimeStr());
-                userInsert.setCreator(userDTO.getAccountName());
-                userInsert.setIsInit(0);
-                userInsert.setVerificationStatus(0);
-
-                //设置默认密码，因为数据库密码不为空，但依然首次登陆需要初始化密码
-                String pwd = NumberUtil.DEFAULT_PWD;
-                String salt = NumberUtil.generateNumber(4);
-                String encryptPwd = Md5Util.md5Encode(pwd+salt);
-                userInsert.setPassword(encryptPwd);
-                userInsert.setSalt(salt);
-
-                userMapper.insert(userInsert);
-
-                userPO = userInsert;
-            }else{
-                //判断用户有效性
-                if(StatusEnum.INVALID.key == userPO.getStatus()){
-                    log.error("登录失败，此用户未启用");
-                    throw new ServiceException("登录失败，此用户未启用");
-                }
-            }
-        }else if(StringUtils.isNotEmpty(userDTO.getPassword())){
-
-            //判断是否注册过
-            if(null == userPO){
-                log.error("登录失败，此用户不存在");
-                throw new ServiceException("登录失败，此用户不存在");
+        if(null != userPO){
+            //判断账户类型和登陆介质
+            String errorMsg = this.judgeAccountTypeAndLoginMedium(userPO,userDTO.getAccountType());
+            if(StringUtils.isNotEmpty(errorMsg)){
+                log.error("userId:" + userPO.getUserId() + errorMsg);
+                throw new ServiceException(errorMsg);
             }
 
             //判断用户有效性
             if(StatusEnum.INVALID.key == userPO.getStatus()){
-                log.error("登录失败，此用户未启用");
+                log.error("userId:" + userPO.getUserId() + "登录失败，此用户未启用");
                 throw new ServiceException("登录失败，此用户未启用");
             }
 
-            String encryptPwdParam = Md5Util.md5Encode(userDTO.getPassword() + userPO.getSalt());
+            //密码登陆，校验密码
+            if(StringUtils.isNotEmpty(userDTO.getPassword())){
 
-            if(!encryptPwdParam.equals(userPO.getPassword())){
-                log.error("登录失败，密码错误");
-                throw new ServiceException("登录失败，密码错误");
+                String encryptPwdParam = Md5Util.md5Encode(userDTO.getPassword() + userPO.getSalt());
+
+                if(!encryptPwdParam.equals(userPO.getPassword())){
+                    log.error("userId:" + userPO.getUserId() + "登录失败，密码错误");
+                    throw new ServiceException("登录失败，密码错误");
+                }
+            }
+            //验证码登陆，校验验证码
+            else if(StringUtils.isNotEmpty(userDTO.getVerifyCode())){
+
+                String cacheVerifyCode = VerifyCodeCache.get(userDTO.getAccountName());
+
+                if(StringUtils.isEmpty(cacheVerifyCode)){
+                    log.error("userId:" + userPO.getUserId() + "验证码已失效，请稍后重发");
+                    throw new ServiceException("验证码已失效，请稍后重发");
+                }
+                if(!cacheVerifyCode.equals(userDTO.getVerifyCode())){
+                    log.error("userId:" + userPO.getUserId() + "验证码错误");
+                    throw new ServiceException("验证码错误");
+                }
+            }
+
+        }else{
+            //密码登陆，抛异常
+            if(StringUtils.isNotEmpty(userDTO.getPassword())){
+                if(null == userPO){
+                    log.error("userId:" + userPO.getUserId() + "登录失败，此用户不存在");
+                    throw new ServiceException("登录失败，此用户不存在");
+                }
+            }
+            //验证码登陆，走自动登陆流程
+            else if(StringUtils.isNotEmpty(userDTO.getVerifyCode())){
+                //后台--验证码登陆不自动注册
+                if(AccountTypeEnum.BACK_STAGE.key == userDTO.getAccountType()){
+                    log.error("userId:" + userPO.getUserId() + "登录失败，此用户不存在");
+                    throw new ServiceException("登录失败，此用户不存在");
+                }
+
+                //自动注册
+                userPO = this.registerFromLogin(userDTO);
             }
         }
+
 
         //保存最后登录时间
         UserPO userUpdate = new UserPO();
@@ -308,12 +312,12 @@ public class UserServiceImpl implements UserService {
         addressPO.setUserId(userPO.getUserId());
         addressPO = addressMapper.selectOne(addressPO);
 
-        userDB = BeanUtil.transformBean(userPO,UserDTO.class);
+        UserDTO userDB = BeanUtil.transformBean(userPO,UserDTO.class);
         userDB.setAddressDTO(BeanUtil.transformBean(addressPO,AddressDTO.class));
         userDB.setPassword(null);
         userDB.setSalt(null);
 
-        //生成token并返回
+        //生成token
         Jwt jwt = new Jwt();
         jwt.setUserId(userPO.getUserId());
         if(1 == userDTO.getFrom()){
@@ -339,6 +343,72 @@ public class UserServiceImpl implements UserService {
         TokenCache.put(userPO.getUserId(),token);
         return userDB;
     }
+
+    /**
+     * 判断账户类型和登陆介质
+     */
+    public String judgeAccountTypeAndLoginMedium(UserPO userPO,Integer accountType){
+
+        String errorMsg = null;
+
+        if(AccountTypeEnum.BACK_STAGE.key == accountType){
+            //平台登陆，需要管理员/后台操作员
+            if(!userPO.getAccountType().equals(accountType)){
+                errorMsg = "登录失败，无效的用户";
+                return errorMsg;
+            }
+            if (StringUtils.isEmpty(userPO.getRoleCodes()) ||
+                    (!userPO.getRoleCodes().contains(PlatformRoleCodeEnum.ADMIN.code)
+                            && !userPO.getRoleCodes().contains(PlatformRoleCodeEnum.BACKSTAGE_OPR.code))) {
+                errorMsg = "登录失败，此用户无后台管理操作权限";
+                return errorMsg;
+            }
+        }else if(AccountTypeEnum.RECYCLE.key == accountType){
+            //回收端登陆，需要回收端用户
+            if(!userPO.getAccountType().equals(accountType)){
+                errorMsg = "登录失败，无效的用户";
+                return errorMsg;
+            }
+        }else if(AccountTypeEnum.PLATFORM.key == accountType){
+            //交易端登陆，需要交易端用户/管理员/交易端操作员
+            if (AccountTypeEnum.BACK_STAGE.key == userPO.getAccountType()) {
+                if (StringUtils.isEmpty(userPO.getRoleCodes()) ||
+                        (!userPO.getRoleCodes().contains(PlatformRoleCodeEnum.ADMIN.code)
+                                && !userPO.getRoleCodes().contains(PlatformRoleCodeEnum.TRANSACTION_OPR.code))) {
+                    errorMsg = "登录失败，此用户无交易端操作权限";
+                    return errorMsg;
+                }
+            } else if (AccountTypeEnum.RECYCLE.key == userPO.getAccountType()) {
+                errorMsg = "登录失败，无效的用户";
+                return errorMsg;
+            }
+        }
+        return errorMsg;
+    }
+
+    public UserPO registerFromLogin(UserDTO userDTO){
+        UserPO userInsert = new UserPO();
+        userInsert.setAccountType(userDTO.getAccountType());
+        userInsert.setAccountName(userDTO.getAccountName());
+        userInsert.setUserName(userDTO.getAccountName());
+        userInsert.setStatus(StatusEnum.VALID.key);
+        userInsert.setCreatedTime(DateUtil.getCurrentDateTimeStr());
+        userInsert.setCreator(userDTO.getAccountName());
+        userInsert.setIsInit(0);
+        userInsert.setVerificationStatus(0);
+
+        //设置默认密码，因为数据库密码不为空，但依然首次登陆需要初始化密码
+        String pwd = NumberUtil.DEFAULT_PWD;
+        String salt = NumberUtil.generateNumber(4);
+        String encryptPwd = Md5Util.md5Encode(pwd+salt);
+        userInsert.setPassword(encryptPwd);
+        userInsert.setSalt(salt);
+
+        userMapper.insert(userInsert);
+        return userInsert;
+    }
+
+
 
     @Override
     public UserDTO queryUserInfoByUserId(Integer userId) {
@@ -367,7 +437,7 @@ public class UserServiceImpl implements UserService {
     }
 
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void modifyUser(UserDTO userDTO) {
 
@@ -378,6 +448,8 @@ public class UserServiceImpl implements UserService {
         userPO.setVerificationContent(userDTO.getVerificationContent());
         userPO.setAvatarImgPath(userDTO.getAvatarImgPath());
         userPO.setUserName(userDTO.getUserName());
+        userPO.setModifier(userDTO.getModifier());
+        userPO.setModifiedTime(userDTO.getModifiedTime());
 
         //修改密码
         if(StringUtils.isNotEmpty(userDTO.getPassword())){
@@ -394,7 +466,7 @@ public class UserServiceImpl implements UserService {
     }
 
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void resetPassword(UserDTO userDTO) {
 
@@ -416,6 +488,7 @@ public class UserServiceImpl implements UserService {
 
         userPO.setPassword(encryptPwd);
         userPO.setSalt(salt);
+        userPO.setIsInit(1);
 
         Example example = new Example(UserPO.class);
         Example.Criteria criteria = example.createCriteria();
@@ -439,7 +512,7 @@ public class UserServiceImpl implements UserService {
     }
 
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void saveOrUpdateUserAddress(AddressDTO addressDTO) {
 

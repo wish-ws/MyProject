@@ -1,5 +1,6 @@
 package com.um.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.um.common.enums.*;
 import com.um.common.exception.ServiceException;
 import com.um.domain.common.PaginationSupportDTO;
@@ -11,6 +12,7 @@ import com.um.domain.dto.UserDTO;
 import com.um.domain.request.OrderQueryRequeset;
 import com.um.service.RecycleOrderService;
 import com.um.service.TransactionOrderService;
+import com.um.util.BeanUtil;
 import com.um.util.DateUtil;
 import com.um.util.NumberUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -19,9 +21,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 /**
  * @author : ws
@@ -53,11 +53,6 @@ public class PlatformOrderController extends BaseController{
                 response.setResult(0);
                 response.setFailReason("当前用户没有权限访问");
                 return response;
-            }
-
-            String roleCodes = super.getCurrentUser().getRoleCodes();
-            if(roleCodes.contains(PlatformRoleCodeEnum.TRANSACTION_OPR.code)){
-                orderQueryRequeset.setCreatorUserId(super.getCurrentUser().getUserId());
             }
 
             PaginationSupportDTO pageInfo = recycleOrderService.queryRecycleOrderPage(orderQueryRequeset);
@@ -268,15 +263,6 @@ public class PlatformOrderController extends BaseController{
 
 
 
-
-
-
-
-
-
-
-
-
     @PostMapping("/transaction/create")
     public Response createTransactionOrder(@RequestBody TransactionOrderDTO transactionOrderDTO){
         Response response = new Response();
@@ -289,7 +275,15 @@ public class PlatformOrderController extends BaseController{
                 return response;
             }
 
+            UserDTO currentUser = super.getCurrentUser();
+
             StringBuffer sb = new StringBuffer();
+            if(null == transactionOrderDTO.getTradeInfoCreatorUserId()){
+                sb.append("供求消息用户id不能为空;");
+            }
+            if(transactionOrderDTO.getTradeInfoCreatorUserId().equals(currentUser.getUserId())){
+                sb.append("自己发布的供求不能直接下单;");
+            }
             if (null == transactionOrderDTO.getOrderType()) {
                 sb.append("订单类型不能为空;");
             }
@@ -299,11 +293,9 @@ public class PlatformOrderController extends BaseController{
             if (null == transactionOrderDTO.getItemPrice()) {
                 sb.append("废品价格不能为空;");
             }
-
             if (null == transactionOrderDTO.getItemWeight()) {
                 sb.append("废品重量不能为空");
             }
-
             if (StringUtils.isEmpty(transactionOrderDTO.getOrderAmount())) {
                 sb.append("订单金额不能为空");
             }
@@ -315,25 +307,32 @@ public class PlatformOrderController extends BaseController{
                 return response;
             }
 
-            UserDTO currentUser = super.getCurrentUser();
+
             Random random = new Random();
             String orderCode = NumberUtil.createCode(Long.valueOf(random.nextInt(9998)), CodePrefitEnum.TRANSACTION.desc);
             transactionOrderDTO.setOrderCode(orderCode);
+            transactionOrderDTO.setCreatorUserId(currentUser.getUserId());
             transactionOrderDTO.setCreator(currentUser.getUserName());
             transactionOrderDTO.setCreatedTime(DateUtil.getCurrentDateTimeStr());
             transactionOrderDTO.setOrderStatus(TransactionOrderStatusEnum.WAIT_FOR_RECEIVE.key);
 
             if(OrderTypeEnum.SALE.key == transactionOrderDTO.getOrderType()){
+                transactionOrderDTO.setBuyerUserId(transactionOrderDTO.getTradeInfoCreatorUserId());
                 transactionOrderDTO.setSellerUserId(currentUser.getUserId());
             }else if(OrderTypeEnum.PURCHASE.key == transactionOrderDTO.getOrderType()){
                 transactionOrderDTO.setBuyerUserId(currentUser.getUserId());
+                transactionOrderDTO.setSellerUserId(transactionOrderDTO.getTradeInfoCreatorUserId());
             }
 
             transactionOrderService.createTransactionOrder(transactionOrderDTO);
             response.setResult(1);
             response.setModel(orderCode);
 
-        } catch(Exception e) {
+        } catch (ServiceException se){
+            log.error("---createTransactionOrder error",se);
+            response.setResult(0);
+            response.setFailReason(se.getMessage());
+        } catch (Exception e) {
             log.error("---createTransactionOrder error",e);
             response.setResult(0);
             response.setFailReason("创建交易订单失败");
@@ -432,7 +431,6 @@ public class PlatformOrderController extends BaseController{
             UserDTO currentUser = super.getCurrentUser();
             TransactionOrderDTO transactionOrderDTO = new TransactionOrderDTO();
             transactionOrderDTO.setOrderCode(orderCode);
-            transactionOrderDTO.setCurrentUserId(currentUser.getUserId());
             transactionOrderDTO.setModifier(currentUser.getUserName());
             transactionOrderDTO.setModifiedTime(DateUtil.getCurrentDateTimeStr());
             String msg = transactionOrderService.modifyTransactionOrder(transactionOrderDTO,OperateTOrderType.confirmReceive);
@@ -510,8 +508,8 @@ public class PlatformOrderController extends BaseController{
                 return response;
             }
 
-            String orderCode =  paramMap.get("orderCode").toString();;
-            List<BusinessImgDTO> businessImgDTOList = (List<BusinessImgDTO>) paramMap.get("businessImgDTOList");
+            String orderCode =  paramMap.get("orderCode").toString();
+            List<BusinessImgDTO> businessImgDTOList = BeanUtil.transformList(paramMap.get("businessImgDTOList"),BusinessImgDTO.class);
 
             TransactionOrderDTO transactionOrderDTO = new TransactionOrderDTO();
             transactionOrderDTO.setOrderCode(orderCode);
@@ -533,6 +531,8 @@ public class PlatformOrderController extends BaseController{
         }
         return response;
     }
+
+
 
 
 

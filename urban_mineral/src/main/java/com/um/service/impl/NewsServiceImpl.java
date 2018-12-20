@@ -54,7 +54,7 @@ public class NewsServiceImpl implements NewsService {
         return paginationSupportDTO;
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void createNews(NewsDTO newsDTO) {
 
@@ -70,7 +70,7 @@ public class NewsServiceImpl implements NewsService {
         systemLogMapper.insertSelective(systemLogPO);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void modifyNews(NewsDTO newsDTO) {
 
@@ -84,7 +84,7 @@ public class NewsServiceImpl implements NewsService {
         newsMapper.updateByPrimaryKeySelective(newsPO);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void deleteNews(Integer id,String operator) {
 
@@ -107,7 +107,10 @@ public class NewsServiceImpl implements NewsService {
         NewsPO newsPO = newsMapper.selectByPrimaryKey(id);
         NewsDTO newsDTO = BeanUtil.transformBean(newsPO,NewsDTO.class);
         //处理返回内容中，图片的样式
-        newsDTO.setContent(StringUtil.replaceImgStyleWidthHeight(newsDTO.getContent()));
+//        newsDTO.setContent(StringUtil.replaceImgStyleWidthHeight(newsDTO.getContent()));
         return newsDTO;
     }
+
+
+
 }

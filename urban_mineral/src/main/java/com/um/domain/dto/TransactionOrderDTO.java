@@ -120,8 +120,15 @@ public class TransactionOrderDTO extends BaseDTO {
      */
     private List<BusinessImgDTO> businessImgDTOList;
 
+    /**
+     * 创建人用户id
+     */
+    private Integer creatorUserId;
 
-    private Integer currentUserId;
+    /**
+     * 供求消息创建人id
+     */
+    private Integer tradeInfoCreatorUserId;
 
     public void setReceivedTime(String receivedTime) {
         if(StringUtils.isNotEmpty(receivedTime)){

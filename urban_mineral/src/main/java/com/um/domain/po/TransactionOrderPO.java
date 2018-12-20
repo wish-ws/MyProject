@@ -79,6 +79,11 @@ public class TransactionOrderPO extends BaseDTO {
     private Integer sellerUserId;
 
     /**
+     * 创建人用户id
+     */
+    private Integer creatorUserId;
+
+    /**
      * 订单状态
      * 1待接单2待交货3待结算4已完成5已取消
      */

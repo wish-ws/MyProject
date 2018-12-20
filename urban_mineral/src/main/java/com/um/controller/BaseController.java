@@ -41,13 +41,16 @@ public class BaseController{
 
 
     public boolean hasRecycleOrderPermission(){
-        //交易端回收订单操作，只有平台管理员和交易端操作员有权限
+        //交易端回收订单操作，只有平台管理员/交易端操作员/回收端用户 有权限
         Integer accountType = this.getCurrentUser().getAccountType();
         String roleCodes = this.getCurrentUser().getRoleCodes();
         boolean hasPermission = false;
         if (accountType.intValue() == AccountTypeEnum.BACK_STAGE.key
                 && (roleCodes.indexOf(PlatformRoleCodeEnum.ADMIN.code) >= 0 || roleCodes.indexOf(PlatformRoleCodeEnum.TRANSACTION_OPR.code) >= 0)
                 ) {
+            hasPermission = true;
+        }
+        if(accountType.intValue() == AccountTypeEnum.RECYCLE.key){
             hasPermission = true;
         }
         return hasPermission;

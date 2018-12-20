@@ -31,4 +31,10 @@ public class OrderQueryRequeset extends BaseRequest {
     private String orderCode;
 
 
+    /**
+     * 交易单类型
+     */
+    private Integer orderType;
+
+
 }
