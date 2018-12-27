@@ -99,7 +99,8 @@ public class UserServiceImpl implements UserService {
         }
         insertUser.setAccountType(userDTO.getAccountType());
         insertUser.setIsInit(1);
-        insertUser.setVerificationStatus(0);
+        //平台账户，默认已认证
+        insertUser.setVerificationStatus(1);
         insertUser.setRoleCodes(userDTO.getRoleCodes());
         insertUser.setStatus(StatusEnum.VALID.key);
         insertUser.setUserName(userDTO.getUserName());
@@ -183,10 +184,12 @@ public class UserServiceImpl implements UserService {
 //            VerifyCodeCache.put(accountName,code);
 //        }
 
+        //测试代码
         boolean sendSuccess = true;
         if(sendSuccess){
             VerifyCodeCache.put(accountName,"123456");
         }
+        //测试代码
 
 
         return sendSuccess;

@@ -41,7 +41,7 @@ public class RecycleOrderServiceImpl implements RecycleOrderService {
 
 
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void createRecycleOrder(RecycleOrderDTO recycleOrderDTO) {
 
