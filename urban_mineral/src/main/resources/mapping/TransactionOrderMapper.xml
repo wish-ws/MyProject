@@ -38,6 +38,9 @@
             and o.buyer_user_id = #{creatorUserId}
         </if>
       </if>
+      <if test="null != orderCode and '' != orderCode" >
+        and o.order_code = #{orderCode}
+      </if>
 
       order by o.created_time desc
     </select>
