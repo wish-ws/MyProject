@@ -28,8 +28,8 @@ public class SmsUtil {
     private static final String domain = "dysmsapi.aliyuncs.com";
 
     // TODO 此处需要替换成开发者自己的AK(在阿里云访问控制台寻找)
-    private static final String accessKeyId = "LTAITGwwMF5qqOIU";
-    private static final String accessKeySecret = "IrkGqOSIAOMEnwIjiZZYRjSsajz9mi";
+    private static final String accessKeyId = "123";
+    private static final String accessKeySecret = "123";
 
     private static IAcsClient acsClient;
 
